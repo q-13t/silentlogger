@@ -6,6 +6,7 @@ public class SilentLogger {
     private String className = "";
     private boolean logToFile = false;
     private static String GENERIC_FORMAT = SilentLoggerManager.getGENERIC_FORMAT();
+    private long timeStart = 0;
 
     private SilentLogger(Class<?> name) {
         setClassName(name);
@@ -75,4 +76,21 @@ public class SilentLogger {
             SilentLoggerManager.informFileWriter(debug);
     }
 
+    public long startTimeTest() {
+        timeStart = System.currentTimeMillis();
+        return timeStart;
+    }
+
+    public long checkpointTimeTest() {
+        long timeElapsed = System.currentTimeMillis() - timeStart;
+        this.debug("Time Elapsed: " + timeElapsed + " milliseconds");
+        return timeElapsed;
+    }
+
+    public long endTimeTest() {
+        long timeElapsed = System.currentTimeMillis() - timeStart;
+        timeStart = System.currentTimeMillis();
+        this.debug("Time Elapsed: " + timeElapsed + " milliseconds");
+        return timeElapsed;
+    }
 }
