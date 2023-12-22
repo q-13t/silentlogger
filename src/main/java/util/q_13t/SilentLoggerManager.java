@@ -1,9 +1,16 @@
 package util.q_13t;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class SilentLoggerManager {
+    private static SilentLogger logger = SilentLogger.getLogger(SilentLoggerManager.class).setLogToFile(true);
     private static String GENERIC_FORMAT = "%s\t%c [%s]\t\t\t: %s";
     private static Queue<String> logQueue = new LinkedList<String>();
     private static Object FileWriterLock = new Object();
@@ -11,8 +18,8 @@ public class SilentLoggerManager {
     private static MemoryLoggerThread MLT = null;
 
     private static class FileWriterThread extends Thread {
-
         private static boolean threadIsAlive = true;
+        private static File logFile;
 
         public static void stopThread() {
             synchronized (FileWriterLock) {
@@ -21,28 +28,75 @@ public class SilentLoggerManager {
             }
         }
 
-        public FileWriterThread() {
+        public FileWriterThread(String directory) {
             setDaemon(true);
+            logFile = new File(checkDir(directory), getDate() + ".txt");
+            if (!logFile.exists()) {
+                try {
+                    if (logFile.createNewFile())
+                        logger.info("Created new Log File");
+                } catch (IOException e) {
+                    logger.error("Exception At creating new File", e);
+                }
+            }
+        }
+
+        private void updateLogFile() {
+            logFile = new File(checkDir(null), getDate() + ".txt");
+            if (!logFile.exists()) {
+                try {
+                    if (logFile.createNewFile())
+                        logger.info("Created new Log File");
+
+                } catch (IOException e) {
+                    logger.error("Exception At creating new File", e);
+                }
+            }
+        }
+
+        public static String getDate() {
+            Calendar calendar = Calendar.getInstance();
+            return calendar.get(Calendar.YEAR) + "-" + calendar.get(Calendar.MONTH) + "-"
+                    + calendar.get(Calendar.DAY_OF_MONTH);
+        }
+
+        private File checkDir(String directory) {
+            File logDir;
+            if (directory == null || directory.isEmpty()) {
+                logDir = new File("logs");
+            } else {
+                logDir = new File(directory + "/logs");
+            }
+            if (!logDir.exists() || !logDir.isDirectory()) {
+                logDir.mkdir();
+            }
+            return logDir;
         }
 
         @Override
         public void run() {
             synchronized (FileWriterLock) {
                 try {
+
+                    PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)));
                     while (threadIsAlive) {
+                        if (!logFile.getName().equals(getDate() + ".txt")) {
+                            updateLogFile();
+                            pw = new PrintWriter(new BufferedWriter(new FileWriter(logFile)));
+                        }
                         if (!logQueue.isEmpty()) {
-                            System.out.println("*Writing To File Imitation*\t\t" + logQueue.poll());
+                            pw.println(logQueue.poll());
+                            pw.flush();
                         }
                         if (logQueue.isEmpty())
                             FileWriterLock.wait();
                     }
+                    pw.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                System.out.println("FileWriterThread Thread Stopped");
             }
         }
-
     }
 
     private static class MemoryLoggerThread extends Thread {
@@ -64,7 +118,8 @@ public class SilentLoggerManager {
             try {
                 while (threadIsAlive) {
                     long freeMemory = Runtime.getRuntime().freeMemory() / 1024;
-                    long useMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024;
+                    long useMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())
+                            / 1024;
 
                     logger.info("APP Info: Memory In Use: "
                             + useMemory + " kilobytes | Free Memory: "
@@ -82,16 +137,32 @@ public class SilentLoggerManager {
         return this;
     }
 
-    public SilentLoggerManager setLogToFile(boolean val) {
+    public SilentLoggerManager setLogToFile(Boolean val) {
+        logger.setLogToFile(val);
+        return this;
+    }
+
+    public SilentLoggerManager enableFileLogger(boolean b) {
         if (FWT == null || !FWT.isAlive()) {
-            FWT = new FileWriterThread();
+            FWT = new FileWriterThread(null);
+            FWT.start();
+        }
+        return this;
+    }
+
+    public SilentLoggerManager enableFileLogger(String b) {
+        if (FWT == null || !FWT.isAlive()) {
+            FWT = new FileWriterThread(b);
             FWT.start();
         }
         return this;
     }
 
     public static void displayMemoryStatus() {
-
+        logger.info("APP Info: Memory In Use: "
+                + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024)
+                + " kilobytes | Free Memory: "
+                + (Runtime.getRuntime().freeMemory() / 1024) + " kilobytes");
     }
 
     public SilentLoggerManager setPeriodicallyDisplayMemoryStatus(int period) {
@@ -122,4 +193,5 @@ public class SilentLoggerManager {
     public static String getGENERIC_FORMAT() {
         return GENERIC_FORMAT;
     }
+
 }

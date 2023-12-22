@@ -55,12 +55,14 @@ public class SilentLogger {
     }
 
     public void error(String message, Throwable error) {
-        String debug;
-        debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'E', className, message)
-                + error.getStackTrace();
+        StringBuilder debug = new StringBuilder();
+        debug.append(String.format(GENERIC_FORMAT, LocalDateTime.now(), 'E', className, message));
+        for (StackTraceElement throwable : error.getStackTrace()) {
+            debug.append(throwable.getLineNumber() + " " + throwable.toString() + "\n");
+        }
         System.err.println(debug);
         if (logToFile)
-            SilentLoggerManager.informFileWriter(debug);
+            SilentLoggerManager.informFileWriter(debug.toString());
     }
 
     public long startTimeTest() {
