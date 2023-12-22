@@ -56,7 +56,9 @@ public class SilentLogger {
 
     public void error(String message, Throwable error) {
         StringBuilder debug = new StringBuilder();
-        debug.append(String.format(GENERIC_FORMAT, LocalDateTime.now(), 'E', className, message));
+        debug.append(
+                String.format(GENERIC_FORMAT, LocalDateTime.now(), 'E', className, message) + error.getMessage()
+                        + "\n");
         for (StackTraceElement throwable : error.getStackTrace()) {
             debug.append(throwable.getLineNumber() + " " + throwable.toString() + "\n");
         }

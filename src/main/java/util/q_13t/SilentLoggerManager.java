@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class SilentLoggerManager {
-    private static SilentLogger logger = SilentLogger.getLogger(SilentLoggerManager.class).setLogToFile(true);
+    private static SilentLogger logger = SilentLogger.getLogger(SilentLoggerManager.class);
     private static String GENERIC_FORMAT = "%s\t%c [%s]\t\t\t: %s";
     private static Queue<String> logQueue = new LinkedList<String>();
     private static Object FileWriterLock = new Object();
@@ -77,7 +77,6 @@ public class SilentLoggerManager {
         public void run() {
             synchronized (FileWriterLock) {
                 try {
-
                     PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)));
                     while (threadIsAlive) {
                         if (!logFile.getName().equals(getDate() + ".txt")) {
@@ -130,11 +129,6 @@ public class SilentLoggerManager {
                 e.printStackTrace();
             }
         }
-    }
-
-    public SilentLoggerManager setFormat(String format) {
-        GENERIC_FORMAT = format;
-        return this;
     }
 
     public SilentLoggerManager setLogToFile(Boolean val) {
