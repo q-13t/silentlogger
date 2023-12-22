@@ -40,11 +40,7 @@ public class SilentLogger {
 
     public void debug(String message) {
         String debug;
-        if (className.isEmpty()) {
-            debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'D', getClass().getSimpleName(), message);
-        } else {
-            debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'D', className, message);
-        }
+        debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'D', className, message);
         System.out.println(debug);
         if (logToFile)
             SilentLoggerManager.informFileWriter(debug);
@@ -52,11 +48,7 @@ public class SilentLogger {
 
     public void info(String message) {
         String debug;
-        if (className.isEmpty()) {
-            debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'I', getClass().getSimpleName(), message);
-        } else {
-            debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'I', className, message);
-        }
+        debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'I', className, message);
         System.out.println(debug);
         if (logToFile)
             SilentLoggerManager.informFileWriter(debug);
@@ -64,13 +56,8 @@ public class SilentLogger {
 
     public void error(String message, Throwable error) {
         String debug;
-        if (className.isEmpty()) {
-            debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'E', getClass().getSimpleName(), message)
-                    + error.getStackTrace();
-        } else {
-            debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'E', className, message)
-                    + error.getStackTrace();
-        }
+        debug = String.format(GENERIC_FORMAT, LocalDateTime.now(), 'E', className, message)
+                + error.getStackTrace();
         System.err.println(debug);
         if (logToFile)
             SilentLoggerManager.informFileWriter(debug);
