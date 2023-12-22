@@ -21,7 +21,7 @@ Step 2. Add the dependency
         <dependency>
 	    <groupId>com.github.q-13t</groupId>
 	    <artifactId>silentlogger</artifactId>
-	    <version>-9bfa4c690a-1</version>
+	    <version>v1.0.0</version>
 	</dependency>
 ```
 
